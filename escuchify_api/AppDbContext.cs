@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using Modelos;
+using escuchify_api.Modelos;
 
 public class AppDbContext : DbContext
 {
@@ -9,6 +9,17 @@ public class AppDbContext : DbContext
     }
 
     public DbSet<Cancion> Canciones { get; set; }
-    // public DbSet<Product> Products { get; set; }
-    // public DbSet<Order> Orders { get; set; }
+    public DbSet<Disco> Discos { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+
+        // Configurar la relación uno a muchos entre Disco y Cancion
+        modelBuilder.Entity<Disco>()
+            .HasMany(d => d.Canciones)
+            .WithOne(c => c.Disco)
+            .HasForeignKey(c => c.DiscoId);
+    }
+
 }

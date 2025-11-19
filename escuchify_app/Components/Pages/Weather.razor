@@ -1,0 +1,62 @@
+﻿@page "/weather"
+@using escuchify_app.Components.Models
+@using static System.Net.WebRequestMethods
+@attribute [StreamRendering]
+@inject HttpClient HttpClient
+
+
+<PageTitle>Discos</PageTitle>
+    
+<h1>Discos</h1>
+
+<p>This component demonstrates showing data.</p>
+
+@if (discos == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Titulo</th>
+                <th>Año de Lanzamiento</th>
+                <th>Tipo de Disco</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var disco in discos)
+            {
+                <tr>
+                    <td>@disco.Id</td>
+                    <td>@disco.Titulo</td>
+                    <td>@disco.AnioLanzamiento</td>
+                    <td>@disco.TipoDisco</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    
+    private Disco[]? discos;
+    protected override async Task OnInitializedAsync()
+    {
+        discos = await HttpClient.GetFromJsonAsync<Disco[]>("http://localhost:5126/discos");
+        @* // Simulate asynchronous loading to demonstrate streaming rendering
+        @* // Simulate asynchronous loading to demonstrate streaming rendering
+        await Task.Delay(500);
+
+        var startDate = DateOnly.FromDateTime(DateTime.Now);
+        var summaries = new[] { "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching" };
+        forecasts = Enumerable.Range(1, 5).Select(index => new WeatherForecast
+        {
+            Date = startDate.AddDays(index),
+            TemperatureC = Random.Shared.Next(-20, 55),
+            Summary = summaries[Random.Shared.Next(summaries.Length)]
+        }).ToArray(); *@
+    }
+}
