@@ -1,0 +1,84 @@
+﻿@page "/discos/nuevo"
+@page "/discos/editar/{Id:int}"
+@using escuchify_app.Components.Models
+@inject HttpClient HttpClient
+@inject NavigationManager NavigationManager
+
+@rendermode InteractiveServer
+
+
+<PageTitle>@(Id == 0 ? "Nuevo Disco" : "Editar Disco")</PageTitle>
+    
+<h1>@(Id == 0 ? "Crear Nuevo Disco" : "Editar Disco")</h1>
+
+@if (disco == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+     <EditForm Model="disco" OnValidSubmit="GuardarDisco" FormName="discoForm">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="mb-3">
+            <label for="titulo" class="form-label">Titulo</label>
+            <InputText id="titulo" class="form-control" @bind-Value="disco.Titulo" />
+        </div>
+
+        <div class="mb-3">
+            <label for="anioLanzamiento" class="form-label">Año de Lanzamiento</label>
+            <InputNumber id="anioLanzamiento" class="form-control" @bind-Value="disco.AnioLanzamiento" />
+        </div>
+
+        <div class="mb-3">
+            <label for="tipoDisco" class="form-label">Tipo de Disco</label>
+            <InputText id="tipoDisco" class="form-control" @bind-Value="disco.TipoDisco" />
+        </div>
+
+        <div class="mb-3">
+            <button type="submit" class="btn btn-primary">Guardar</button>
+            <button type="button" class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
+        </div>
+        
+    </EditForm> 
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    [SupplyParameterFromForm]
+    private Disco disco { get; set; } = new Disco();
+
+    protected override async Task OnInitializedAsync()
+    {
+        @* Si el Id es mayor a cero quiere decir que estamos editando un objeto *@
+        if (Id > 0)
+        {
+            disco = await HttpClient.GetFromJsonAsync<Disco>(requestUri: $"http://localhost:5126/discos/{Id}") ?? new Disco();
+        }
+    }
+
+    private async Task GuardarDisco()
+    {
+        HttpResponseMessage response;
+        if (Id == 0)
+        {
+            response = await HttpClient.PostAsJsonAsync(requestUri: "http://localhost:5126/discos/", disco);
+        }
+        else
+        {
+            response = await HttpClient.PutAsJsonAsync(requestUri: $"http://localhost:5126/discos/{Id}", disco);
+        }
+        if (response.IsSuccessStatusCode)
+        {
+            NavigationManager.NavigateTo(uri: "/discos");
+        }
+    }
+
+    private void Cancelar()
+    {
+        NavigationManager.NavigateTo(uri: "/discos");
+    }
+}
