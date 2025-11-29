@@ -2,9 +2,10 @@ using Microsoft.EntityFrameworkCore;
 using Proyecto2G12.Modelos;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite("Data Source=proyecto2g12.db"));
+builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlite("Data Source=proyecto2g12.db"));
 
+builder.Services.AddEndpointsApiExplorer(); // Necesario para que descubra las rutas
+builder.Services.AddSwaggerGen(); // Generador de Swagger
 
 var app = builder.Build();
 
@@ -15,20 +16,127 @@ using (var scope = app.Services.CreateScope())
     dbContext.Database.EnsureCreated();
 }
 
-//Canciones 
-app.MapGet("/canciones", async (AppDbContext db) =>
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();    // <--- Habilita el JSON de OpenAPI
+    app.UseSwaggerUI();  // <--- Habilita la pantalla gráfica (HTML/CSS)
+}
+//CANCIONES 
+
+// Obtener todas las canciones
+app.MapGet("/canciones", (AppDbContext db) =>
 {
     var canciones = db.Canciones.ToList();
     return Results.Ok(canciones);
 }).WithName("GetCanciones");
-//Discos 
+
+// Obtener una canción por su ID
+app.MapGet("/canciones/{id}", (int id, AppDbContext db) =>
+{
+    var cancion = db.Canciones.Find(id);
+    return cancion != null ? Results.Ok(cancion) : Results.NotFound();
+}).WithName("GetCancionById");
+
+// Crear una nueva canción
+app.MapPost("/canciones", (Cancion cancion, AppDbContext db) =>
+{
+    db.Canciones.Add(cancion);
+    db.SaveChanges();
+    return Results.Created($"/canciones/{cancion.Id}", cancion);
+}).WithName("CreateCancion");
+
+// Actualizar una canción existente
+app.MapPut("/canciones/{id}", (int id, Cancion updatedCancion, AppDbContext db) =>
+{
+    var cancion = db.Canciones.Find(id);
+    if (cancion == null)
+    {
+        return Results.NotFound();
+    }
+
+    cancion.Titulo = updatedCancion.Titulo;
+    cancion.Duracion = updatedCancion.Duracion;
+    cancion.Genero = updatedCancion.Genero;
+    cancion.DiscoId = updatedCancion.DiscoId;
+
+    db.SaveChanges();
+    return Results.NoContent();
+}).WithName("UpdateCancion");
+
+// Eliminar una canción
+app.MapDelete("/canciones/{id}", (int id, AppDbContext db) =>
+{
+    var cancion = db.Canciones.Find(id);
+    if (cancion == null)
+    {
+        return Results.NotFound();
+    }
+
+    db.Canciones.Remove(cancion);
+    db.SaveChanges();
+    return Results.NoContent();
+}).WithName("DeleteCancion");
+
+
+//DISCOS 
+// Obtener todos los discos
 app.MapGet("/discos", (AppDbContext db) =>
 {
     // var discos = db.Discos.Include(d => d.Canciones).ToList();
     var discos = db.Discos.ToList();
     return Results.Ok(discos);
 }).WithName("GetDiscos");
-//Artistas
+
+// Obtener un disco por su ID
+app.MapGet("/discos/{id}", (int id, AppDbContext db) =>
+{
+    var disco = db.Discos.Find(id);
+    return disco != null ? Results.Ok(disco) : Results.NotFound();
+}).WithName("GetDiscoById");
+
+// Crear un nuevo disco
+app.MapPost("/discos", (Disco disco, AppDbContext db) =>
+{
+    db.Discos.Add(disco);
+    db.SaveChanges();
+    return Results.Created($"/discos/{disco.Id}", disco);
+}).WithName("CreateDisco");
+
+// Actualizar un disco existente
+app.MapPut("/discos/{id}", (int id, Disco updatedDisco, AppDbContext db) =>
+{
+    var disco = db.Discos.Find(id);
+    if (disco == null)
+    {
+        return Results.NotFound();
+    }
+
+    disco.Titulo = updatedDisco.Titulo;
+    disco.AnioLanzamiento = updatedDisco.AnioLanzamiento;
+    disco.TipoDisco = updatedDisco.TipoDisco;
+    disco.ArtistaId = updatedDisco.ArtistaId;
+
+    db.SaveChanges();
+    return Results.NoContent();
+}).WithName("UpdateDisco");
+
+// Eliminar un disco
+app.MapDelete("/discos/{id}", (int id, AppDbContext db) =>
+{
+    var disco = db.Discos.Find(id);
+    if (disco == null)
+    {
+        return Results.NotFound();
+    }
+
+    db.Discos.Remove(disco);
+    db.SaveChanges();
+    return Results.NoContent();
+}).WithName("DeleteDisco");
+
+//ARTISTAS
+
+// Obtener todos los artistas
 app.MapGet("/artistas", (AppDbContext db) =>
 {
     // var artistas = db.Artistas.Include(a => a.Discos).ToList();
@@ -36,6 +144,52 @@ app.MapGet("/artistas", (AppDbContext db) =>
     return Results.Ok(artistas);
 }).WithName("GetArtistas");
 
+// Obtener un artista por su ID
+app.MapGet("/artistas/{id}", (int id, AppDbContext db) =>
+{
+    var artista = db.Artistas.Find(id);
+    return artista != null ? Results.Ok(artista) : Results.NotFound();
+}).WithName("GetArtistaById");
+
+// Crear un nuevo artista
+app.MapPost("/artistas", (Artista artista, AppDbContext db) =>
+{
+    db.Artistas.Add(artista);
+    db.SaveChanges();
+    return Results.Created($"/artistas/{artista.Id}", artista);
+}).WithName("CreateArtista");
+
+// Actualizar un artista existente
+app.MapPut("/artistas/{id}", (int id, Artista updatedArtista, AppDbContext db) =>
+{
+    var artista = db.Artistas.Find(id);
+    if (artista == null)
+    {
+        return Results.NotFound();
+    }
+
+    artista.Nombre = updatedArtista.Nombre;
+    artista.NombreArtistico = updatedArtista.NombreArtistico;
+    artista.Nacionaldiad = updatedArtista.Nacionaldiad;
+    artista.Discografica = updatedArtista.Discografica;
+
+    db.SaveChanges();
+    return Results.NoContent();
+}).WithName("UpdateArtista");
+
+// Eliminar un artista
+app.MapDelete("/artistas/{id}", (int id, AppDbContext db) =>
+{
+    var artista = db.Artistas.Find(id);
+    if (artista == null)
+    {
+        return Results.NotFound();
+    }
+
+    db.Artistas.Remove(artista);
+    db.SaveChanges();
+    return Results.NoContent();
+}).WithName("DeleteArtista");
 
 app.MapGet("/", () => "Hello World!");
 
