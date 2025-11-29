@@ -1,0 +1,68 @@
+@page "/artistas/editar/{Id:int}"
+@using proyecto2G12_app.Models
+@rendermode InteractiveServer
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+
+<h3>Editar Artista</h3>
+
+@if (artista == null)
+{
+    <p><em>Cargando datos del artista...</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-6">
+            <EditForm Model="@artista" OnValidSubmit="ActualizarArtista">
+                
+                <div class="mb-3">
+                    <label class="form-label">Nombre Real</label>
+                    <InputText class="form-control" @bind-Value="artista.Nombre" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Nombre Artístico</label>
+                    <InputText class="form-control" @bind-Value="artista.NombreArtistico" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Nacionalidad</label>
+                    <InputText class="form-control" @bind-Value="artista.Nacionaldiad" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Discográfica</label>
+                    <InputText class="form-control" @bind-Value="artista.Discografica" />
+                </div>
+
+                <button type="submit" class="btn btn-warning">Actualizar</button>
+                <a href="/artistas" class="btn btn-secondary">Cancelar</a>
+            </EditForm>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; } // Recibimos el ID desde la URL
+
+    private Artista? artista;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try {
+            artista = await Http.GetFromJsonAsync<Artista>($"/artistas/{Id}");
+        } catch { 
+            await JS.InvokeVoidAsync("alert", "Error al cargar los datos del artista.");
+        }
+    }
+
+    private async Task ActualizarArtista()
+    {
+        // Enviamos el PUT con los datos modificados
+        await Http.PutAsJsonAsync($"/artistas/{Id}", artista);
+        Navigation.NavigateTo("/artistas");
+    }
+}

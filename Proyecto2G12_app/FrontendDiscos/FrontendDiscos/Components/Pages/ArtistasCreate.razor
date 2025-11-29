@@ -1,0 +1,66 @@
+@page "/artistas/nuevo"
+@using proyecto2G12_app.Models
+@rendermode InteractiveServer // Le indica a razor que este componente es interactivo
+@* Que sea interactivo significa que el componente puede manejar eventos y actualizarse dinámicamente sin recargar la página *@
+@* Por defecto razor components son estáticos *@
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+
+<h3>Crear Nuevo Artista</h3>
+
+<div class="row">
+    <div class="col-md-6">
+        @* EditForm gestiona la validación y el envío *@
+        <EditForm Model="@nuevoArtista" OnValidSubmit="GuardarArtista">
+            
+            @* Campo: Nombre *@
+            <div class="mb-3">
+                <label class="form-label">Nombre Real</label>
+                <InputText class="form-control" @bind-Value="nuevoArtista.Nombre" />
+            </div>
+
+            @* Campo: Nombre Artístico (Recodá que en tu API es un número int) *@
+            <div class="mb-3">
+                <label class="form-label">Nombre Artístico</label>
+                <InputText class="form-control" @bind-Value="nuevoArtista.NombreArtistico" />
+            </div>
+
+            @* Campo: Nacionalidad *@
+            <div class="mb-3">
+                <label class="form-label">Nacionalidad</label>
+                <InputText class="form-control" @bind-Value="nuevoArtista.Nacionaldiad" />
+            </div>
+
+            @* Campo: Discográfica *@
+            <div class="mb-3">
+                <label class="form-label">Discográfica</label>
+                <InputText class="form-control" @bind-Value="nuevoArtista.Discografica" />
+            </div>
+
+            <button type="submit" class="btn btn-success">Guardar</button>
+            <a href="/artistas" class="btn btn-secondary">Cancelar</a>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    // Creamos una instancia vacía para llenar con el formulario
+    private Artista nuevoArtista = new Artista();
+
+    private async Task GuardarArtista()
+    {
+        // 1. Enviamos el POST a la API
+        var respuesta = await Http.PostAsJsonAsync("/artistas", nuevoArtista);
+
+        if (respuesta.IsSuccessStatusCode)
+        {
+            // 2. Si salió bien, volvemos a la lista
+            Navigation.NavigateTo("/artistas");
+        }
+        else
+        {
+            await JS.InvokeVoidAsync("alert", "Error al guardar el artista.");
+        }
+    }
+}

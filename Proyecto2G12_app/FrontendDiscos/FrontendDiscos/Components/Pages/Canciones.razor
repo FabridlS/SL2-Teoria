@@ -1,0 +1,44 @@
+@page "/canciones"
+@using proyecto2G12_app.Models
+@inject HttpClient Http
+
+<h3>Mis Canciones</h3>
+
+@if (canciones == null)
+{
+    <p><em>Cargando...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Título</th>
+                <th>Duración</th>
+                <th>Género</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var cancion in canciones)
+            {
+                <tr>
+                    <td>@cancion.Titulo</td>
+                    <td>@cancion.Duracion</td>
+                    <td>@cancion.Genero</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private Cancion[]? canciones;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try {
+            canciones = await Http.GetFromJsonAsync<Cancion[]>("/canciones");
+        }
+        catch (Exception ex) { Console.WriteLine(ex); }
+    }
+}

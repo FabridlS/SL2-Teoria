@@ -1,0 +1,87 @@
+@page "/artistas"
+@using proyecto2G12_app.Models
+@inject HttpClient Http
+@rendermode InteractiveServer
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+
+<h3>Mis Artistas</h3>
+<div class="mb-3">
+    <a href="/artistas/nuevo" class="btn btn-primary">
+        + Nuevo Artista
+    </a>
+</div>
+@if (artistas == null)
+{
+    <p><em>Cargando...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Discográfica</th>
+                <th>Nacionalidad</th>
+                <th>Nombre Artístico</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var artista in artistas)
+            {
+                <tr>
+                    <td>@artista.Nombre</td>
+                    <td>@artista.Discografica</td>
+                    <td>@artista.Nacionaldiad</td>
+                    <td>@artista.NombreArtistico</td>
+                    <td>
+                        @* Botón Editar (Navega a otra página) *@
+                        <button class="btn btn-warning btn-sm me-2" 
+                                @onclick="() => Editar(artista.Id)">
+                            Editar
+                        </button>
+
+                        @* Botón Eliminar (Ejecuta la acción directa) *@
+                        <button class="btn btn-danger btn-sm" 
+                                @onclick="() => Eliminar(artista)">
+                            Eliminar
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private Artista[]? artistas;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try {
+            // Llamamos a tu API
+            artistas = await Http.GetFromJsonAsync<Artista[]>("/artistas");
+        }
+        catch (Exception ex) { Console.WriteLine(ex); }
+    }
+
+    // Navegar a la página de edición
+    private void Editar(int id)
+    {
+        Navigation.NavigateTo($"/artistas/editar/{id}");
+    }
+    
+    // Lógica para borrar
+    private async Task Eliminar(Artista artista)
+    {
+        // Confirmación simple con Javascript
+        bool confirmado = await JS.InvokeAsync<bool>("confirm", $"¿Seguro que querés borrar a {artista.Nombre}?");
+        
+        if (confirmado)
+        {
+            await Http.DeleteAsync($"/artistas/{artista.Id}");
+            await OnInitializedAsync(); // Recargamos la lista para ver el cambio
+        }
+    }
+}

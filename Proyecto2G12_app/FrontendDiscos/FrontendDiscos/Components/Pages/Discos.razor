@@ -1,0 +1,49 @@
+@page "/discos"
+@using FrontendDiscos.Models
+@inject HttpClient Http
+
+<h3>Mis Discos desde la API</h3>
+
+@if (discos == null)
+{
+    <p><em>Cargando datos...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Título</th>
+                <th>Año</th>
+                <th>Tipo</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var disco in discos)
+            {
+                <tr>
+                    <td>@disco.Titulo</td>
+                    <td>@disco.AnioLanzamiento</td>
+                    <td>@disco.TipoDisco</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private Disco[]? discos;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Acá llamamos al endpoint GET /discos de tu API
+        try 
+        {
+            discos = await Http.GetFromJsonAsync<Disco[]>("/discos");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error conectando a la API: {ex.Message}");
+        }
+    }
+}
