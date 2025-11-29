@@ -28,6 +28,18 @@ public class AppDbContext : DbContext
             .WithOne(d => d.Artistas)
             .HasForeignKey(d => d.ArtistaId);
 
-    }
+        //Aunque Entity Framework ya se encarga de hacer los Id autoincrementales,
+        //esto es para asegurarnos de que así sea.
+        modelBuilder.Entity<Artista>()
+            .Property(a => a.Id)
+            .ValueGeneratedOnAdd(); 
 
+        modelBuilder.Entity<Disco>()
+            .Property(d => d.Id)
+            .ValueGeneratedOnAdd();
+
+        modelBuilder.Entity<Cancion>()
+            .Property(c => c.Id)
+            .ValueGeneratedOnAdd();
+    }
 }

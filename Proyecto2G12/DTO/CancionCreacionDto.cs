@@ -1,0 +1,1 @@
+public record CancionCreacionDto(string Titulo, string Duracion, string Genero, int DiscoId);

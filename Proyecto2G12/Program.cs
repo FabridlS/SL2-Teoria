@@ -38,11 +38,22 @@ app.MapGet("/canciones/{id}", (int id, AppDbContext db) =>
 }).WithName("GetCancionById");
 
 // Crear una nueva canción
-app.MapPost("/canciones", (Cancion cancion, AppDbContext db) =>
+app.MapPost("/canciones", (CancionCreacionDto dto, AppDbContext db) =>
 {
-    db.Canciones.Add(cancion);
+    // var discoExiste = db.Discos.AnyAsync(d => d.Id == dto.DiscoId);
+    // if (!discoExiste) return Results.BadRequest("El DiscoId especificado no existe.");
+    
+    var nuevaCancion = new Cancion
+    (
+        0, // El ID va en 0 porque la BD lo autogenera
+        dto.Titulo,
+        dto.Duracion,
+        dto.Genero,
+        dto.DiscoId
+    );
+    db.Canciones.Add(nuevaCancion);
     db.SaveChanges();
-    return Results.Created($"/canciones/{cancion.Id}", cancion);
+    return Results.Created($"/canciones/{nuevaCancion.Id}", nuevaCancion);
 }).WithName("CreateCancion");
 
 // Actualizar una canción existente
@@ -95,11 +106,20 @@ app.MapGet("/discos/{id}", (int id, AppDbContext db) =>
 }).WithName("GetDiscoById");
 
 // Crear un nuevo disco
-app.MapPost("/discos", (Disco disco, AppDbContext db) =>
+app.MapPost("/discos", (DiscoCreacionDto dto, AppDbContext db) =>
 {
-    db.Discos.Add(disco);
+    var nuevoDisco = new Disco
+    (
+        0, // El ID va en 0 porque la BD lo autogenera
+        dto.Titulo,
+        dto.AnioLanzamiento,
+        dto.TipoDisco,
+        dto.ArtistaId
+    );
+
+    db.Discos.Add(nuevoDisco);
     db.SaveChanges();
-    return Results.Created($"/discos/{disco.Id}", disco);
+    return Results.Created($"/discos/{nuevoDisco.Id}", nuevoDisco);
 }).WithName("CreateDisco");
 
 // Actualizar un disco existente
@@ -152,11 +172,19 @@ app.MapGet("/artistas/{id}", (int id, AppDbContext db) =>
 }).WithName("GetArtistaById");
 
 // Crear un nuevo artista
-app.MapPost("/artistas", (Artista artista, AppDbContext db) =>
-{
-    db.Artistas.Add(artista);
+app.MapPost("/artistas", (ArtistaCreacionDto dto, AppDbContext db) =>
+{   
+    var nuevoArtista = new Artista
+    (
+        0, // El ID va en 0 porque la BD lo autogenera
+        dto.Nombre,
+        dto.NombreArtistico,
+        dto.Nacionaldiad,
+        dto.Discografica
+    );
+    db.Artistas.Add(nuevoArtista);
     db.SaveChanges();
-    return Results.Created($"/artistas/{artista.Id}", artista);
+    return Results.Created($"/artistas/{nuevoArtista.Id}", nuevoArtista);
 }).WithName("CreateArtista");
 
 // Actualizar un artista existente

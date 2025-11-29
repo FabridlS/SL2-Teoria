@@ -6,21 +6,22 @@ public class Disco
     public string Titulo { get; set; }
     public int AnioLanzamiento { get; set; }
     public string TipoDisco { get; set; }
-
+    public int ArtistaId { get; set; }
+    public Artista? Artistas { get; set; }
     // Canciones vinculadas
     public List<Cancion> Canciones { get; set; } = new List<Cancion>();
     
 
-    public Disco(int id, string titulo, int anioLanzamiento, string tipoDisco)
+    public Disco(int id, string titulo, int anioLanzamiento, string tipoDisco, int artistaId)
     {
         Id = id;
         Titulo = titulo;
         AnioLanzamiento = anioLanzamiento;
         TipoDisco = tipoDisco;
+        ArtistaId = artistaId;
     }
 
-    public int ArtistaId { get; set; }
-    public Artista? Artistas { get; set; }
+
 
     public override string ToString()
     {
