@@ -1,1 +1,1 @@
-public record ArtistaCreacionDto(string Nombre, int NombreArtistico, string Nacionaldiad, string Discografica);
+public record ArtistaCreacionDto(string Nombre, string NombreArtistico, string Nacionaldiad, string Discografica);

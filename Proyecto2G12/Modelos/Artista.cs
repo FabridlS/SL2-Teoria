@@ -4,7 +4,7 @@ public class Artista
 {
     public int Id { get; set; }
     public string Nombre { get; set; }
-    public int NombreArtistico { get; set; }
+    public string NombreArtistico { get; set; }
     public string Nacionaldiad { get; set; }
     public string Discografica { get; set; }
 
@@ -12,7 +12,7 @@ public class Artista
     public List<Cancion> Canciones { get; set; } = new List<Cancion>();
     public List<Disco> Discos { get; set; } = new List<Disco>();
 
-    public Artista(int id, string nombre, int nombreArtistico, string nacionaldiad, string discografica)
+    public Artista(int id, string nombre, string nombreArtistico, string nacionaldiad, string discografica)
     {
         Id = id;
         Nombre = nombre;

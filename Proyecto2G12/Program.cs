@@ -34,7 +34,7 @@ app.MapGet("/canciones", (AppDbContext db) =>
 app.MapGet("/canciones/{id}", (int id, AppDbContext db) =>
 {
     var cancion = db.Canciones.Find(id);
-    return cancion != null ? Results.Ok(cancion) : Results.NotFound();
+    return cancion != null ? Results.Ok(cancion) : Results.NotFound(); // 200 OK o 404 Not Found
 }).WithName("GetCancionById");
 
 // Crear una nueva canción
@@ -43,6 +43,21 @@ app.MapPost("/canciones", (CancionCreacionDto dto, AppDbContext db) =>
     // var discoExiste = db.Discos.AnyAsync(d => d.Id == dto.DiscoId);
     // if (!discoExiste) return Results.BadRequest("El DiscoId especificado no existe.");
     
+    if (string.IsNullOrEmpty(dto.Titulo))
+    {
+        return Results.BadRequest("El título de la canción es obligatorio."); // 400
+    }
+
+    if (string.IsNullOrEmpty(dto.Titulo))
+    {
+        return Results.BadRequest("La duración de la canción es obligatoria."); // 400
+    }
+
+    if (string.IsNullOrEmpty(dto.Duracion))
+    {
+        return Results.BadRequest("El género de la canción es obligatorio."); // 400
+    }
+
     var nuevaCancion = new Cancion
     (
         0, // El ID va en 0 porque la BD lo autogenera
@@ -53,7 +68,7 @@ app.MapPost("/canciones", (CancionCreacionDto dto, AppDbContext db) =>
     );
     db.Canciones.Add(nuevaCancion);
     db.SaveChanges();
-    return Results.Created($"/canciones/{nuevaCancion.Id}", nuevaCancion);
+    return Results.Created($"/canciones/{nuevaCancion.Id}", nuevaCancion); // 201 Created
 }).WithName("CreateCancion");
 
 // Actualizar una canción existente
@@ -71,7 +86,7 @@ app.MapPut("/canciones/{id}", (int id, Cancion updatedCancion, AppDbContext db) 
     cancion.DiscoId = updatedCancion.DiscoId;
 
     db.SaveChanges();
-    return Results.NoContent();
+    return Results.NoContent(); //204 No Content
 }).WithName("UpdateCancion");
 
 // Eliminar una canción
@@ -108,6 +123,26 @@ app.MapGet("/discos/{id}", (int id, AppDbContext db) =>
 // Crear un nuevo disco
 app.MapPost("/discos", (DiscoCreacionDto dto, AppDbContext db) =>
 {
+    if (string.IsNullOrEmpty(dto.Titulo))
+    {
+        return Results.BadRequest("El título del disco es obligatorio."); // 400
+    }
+
+    if (dto.AnioLanzamiento <= 0)
+    {
+        return Results.BadRequest("El año de lanzamiento del disco es obligatorio y debe ser un número positivo."); // 400
+    }
+
+    if (string.IsNullOrEmpty(dto.TipoDisco))
+    {
+        return Results.BadRequest("El tipo de disco es obligatorio."); // 400
+    }
+
+    if (dto.ArtistaId <= 0)
+    {
+        return Results.BadRequest("El ID del artista es obligatorio y debe ser un número positivo."); // 400
+    }
+
     var nuevoDisco = new Disco
     (
         0, // El ID va en 0 porque la BD lo autogenera
@@ -174,6 +209,26 @@ app.MapGet("/artistas/{id}", (int id, AppDbContext db) =>
 // Crear un nuevo artista
 app.MapPost("/artistas", (ArtistaCreacionDto dto, AppDbContext db) =>
 {   
+    if (string.IsNullOrEmpty(dto.Nombre))
+    {
+        return Results.BadRequest("El nombre del artista es obligatorio."); // 400
+    }
+
+    if (string.IsNullOrEmpty(dto.NombreArtistico))
+    {
+        return Results.BadRequest("El nombre artístico del artista es obligatorio."); // 400
+    }
+
+    if (string.IsNullOrEmpty(dto.Nacionaldiad))
+    {
+        return Results.BadRequest("La nacionalidad del artista es obligatoria."); // 400
+    }
+
+    if (string.IsNullOrEmpty(dto.Discografica))
+    {
+        return Results.BadRequest("La discográfica del artista es obligatoria."); // 400
+    }
+    
     var nuevoArtista = new Artista
     (
         0, // El ID va en 0 porque la BD lo autogenera
