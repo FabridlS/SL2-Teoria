@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using Modelos;
+using escuchify_api.Modelos;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,7 +25,11 @@ builder.Services.AddCors(options =>
 });
 
 // Agregar servicios de controladores
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+    });
 
 var app = builder.Build();
 
@@ -58,6 +62,8 @@ app.MapGet("/{username}", (string username) =>
     return $"Hola {username}";
 })
 .WithName("GetHolaUsuario");
+
+// CANCIONES
 
 // Endpoint para obtener todas las canciones
 app.MapGet("/canciones", (AppDbContext db) =>
@@ -114,5 +120,63 @@ app.MapDelete("/canciones/{id}", (AppDbContext db, int id) =>
     return Results.NoContent();
 }).WithName("DeleteCancion");
 
+// DISCOS
+// Get para obtener todos los discos junto con sus canciones
+app.MapGet("/discos", (AppDbContext db) =>
+{
+    // var discos = db.Discos.Include(d => d.Canciones).ToList();
+    var discos = db.Discos.ToList();
+    return Results.Ok(discos);
+}).WithName("GetDiscos");
+
+// get para obtener un disco por id junto con sus canciones
+app.MapGet("/discos/{id}", (AppDbContext db, int id) =>
+{
+    var disco = db.Discos.Include(d => d.Canciones).FirstOrDefault(d => d.Id == id);
+    if (disco == null)
+    {
+        return Results.NotFound();
+    }
+    return Results.Ok(disco);
+}).WithName("GetDiscoById");
+
+// Post para crear un nuevo disco
+app.MapPost("/discos", (AppDbContext db, Disco nuevoDisco) =>
+{
+    db.Discos.Add(nuevoDisco);
+    db.SaveChanges();
+    return Results.Created($"/discos/{nuevoDisco.Id}", nuevoDisco);
+}).WithName("CreateDisco");
+
+// Put para actualizar un disco existente
+app.MapPut("/discos/{id}", (AppDbContext db, int id, Disco discoActualizado) =>
+{
+    var disco = db.Discos.Find(id);
+    if (disco == null)
+    {
+        return Results.NotFound();
+    }
+
+    disco.Titulo = discoActualizado.Titulo;
+    disco.AnioLanzamiento = discoActualizado.AnioLanzamiento;
+    disco.TipoDisco = discoActualizado.TipoDisco;
+
+    db.SaveChanges();
+    return Results.Ok(disco);
+}).WithName("UpdateDisco");
+
+// Delete para eliminar un disco
+app.MapDelete("/discos/{id}", (AppDbContext db, int id) =>
+{
+    var disco = db.Discos.Find(id);
+    if (disco == null)
+    {
+        return Results.NotFound();
+    }   
+
+    db.Discos.Remove(disco);
+    db.SaveChanges();
+    return Results.NoContent();
+}).WithName("DeleteDisco");
 
 app.Run();

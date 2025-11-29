@@ -1,0 +1,96 @@
+﻿@page "/discos"
+@using escuchify_app.Components.Models
+@using static System.Net.WebRequestMethods
+@rendermode InteractiveServer
+@inject HttpClient HttpClient
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+
+
+
+<PageTitle>Discos</PageTitle>
+    
+<h1>Discos</h1>
+
+<div class="mb-3">
+    <a class="btn btn-primary" href="/discos/nuevo">Crear Nuevo Disco</a>
+</div>
+
+@if (discos == null)
+{
+    <p><em>Loading...</em></p>
+}
+else if (discos.Length == 0)
+{
+    <p><em>No hay discos disponibles.</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Titulo</th>
+                <th>Año de Lanzamiento</th>
+                <th>Tipo de Disco</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (Disco disco in discos)
+            {
+                <tr>
+                    <td>@disco.Id</td>
+                    <td>@disco.Titulo</td>
+                    <td>@disco.AnioLanzamiento</td>
+                    <td>@disco.TipoDisco</td>
+                    <td>
+                        <button class="btn btn-info" @onclick="() => VerDisco(disco.Id)">
+                            Ver 
+                        </button>
+                        <button class="btn btn-warning" @onclick="() => EditarDisco(disco.Id)">
+                            Editar 
+                        </button>
+                        <button class="btn btn-danger" @onclick="() => EliminarDisco(disco.Id)">
+                            Eliminar
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    
+    private Disco[]? discos;
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDiscos();
+    }
+
+    private async Task LoadDiscos()
+    {
+        discos = await HttpClient.GetFromJsonAsync<Disco[]>(requestUri: "http://localhost:5126/discos");
+    }
+
+    private void NuevoDisco()
+    {
+        NavigationManager.NavigateTo(uri: "/discos/nuevo");
+    }   
+
+    private void VerDisco(int id)
+    {
+        NavigationManager.NavigateTo(uri: $"/discos/{id}");
+    }
+
+    private void EditarDisco(int id)
+    {
+        NavigationManager.NavigateTo(uri: $"/discos/editar/{id}");
+    }
+
+    private void EliminarDisco(int id)
+    {
+        NavigationManager.NavigateTo(uri: $"/discos/eliminar/{id}");
+    }
+}

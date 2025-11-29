@@ -1,4 +1,4 @@
-namespace Modelos;
+namespace escuchify_api.Modelos;
 
 public class Cancion
 {
@@ -15,4 +15,16 @@ public class Cancion
         Duracion = duracion;
         Genero = genero;
     }
+
+    public override string ToString()
+    {
+        return $"Título: {Titulo}, Duración: {Duracion}, Género: {Genero}";
+    }
+
+    // FK para Disco
+    public int DiscoId { get; set; }
+    public Disco? Disco { get; set; } // Navegación hacia Disco
+
+
+
 }
