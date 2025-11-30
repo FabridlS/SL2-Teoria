@@ -1,0 +1,74 @@
+@page "/canciones/editar/{Id:int}"
+@using proyecto2G12_app.Models
+@rendermode InteractiveServer
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+
+
+<h3>Editar Cancion</h3>
+
+@if (cancion == null)
+{
+    <p><em>Cargando datos de la cancion...</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-6">
+            @* EditForm gestiona la validación y el envío *@
+            <EditForm Model="@cancion" OnValidSubmit="ActualizarCancion">
+                
+                @* Campo: Titulo *@
+                <div class="mb-3">
+                    <label class="form-label">Titulo</label>
+                    <InputText class="form-control" @bind-Value="cancion.Titulo" />
+                </div>
+
+                @* Campo: Duracion *@
+                <div class="mb-3">
+                    <label class="form-label">Duracion</label>
+                    <InputText class="form-control" @bind-Value="cancion.Duracion" />
+                </div>
+
+                @* Campo: Genero *@
+                <div class="mb-3">
+                    <label class="form-label">Genero</label>
+                    <InputText class="form-control" @bind-Value="cancion.Genero" />
+                </div>
+
+                @* Campo: Disco perteneciente *@
+                <div class="mb-3">
+                    <label class="form-label">Disco perteneciente</label>
+                    <InputNumber class="form-control" @bind-Value="cancion.DiscoId" />
+                </div>
+
+                <button type="submit" class="btn btn-warning">Actualizar</button>
+                <a href="/canciones" class="btn btn-secondary">Cancelar</a>
+            </EditForm>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; } // Recibimos el ID desde la URL
+
+    private Cancion? cancion;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try {
+            cancion = await Http.GetFromJsonAsync<Cancion>($"/canciones/{Id}");
+        } catch { 
+            await JS.InvokeVoidAsync("alert", "Error al cargar los datos de la canción.");
+        }
+    }
+
+    private async Task ActualizarCancion()
+    {
+        // Enviamos el PUT con los datos modificados
+        await Http.PutAsJsonAsync($"/canciones/{Id}", cancion);
+        Navigation.NavigateTo("/canciones");
+    }
+}

@@ -6,14 +6,28 @@
 @inject IJSRuntime JS
 
 <h3>Mis Artistas</h3>
+
+@* 1. Bloque para mostrar errores si algo falla *@
+@if (!string.IsNullOrEmpty(mensajeError))
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <strong>Error:</strong> @mensajeError
+        <button type="button" class="btn-close" @onclick="() => mensajeError = null"></button>
+    </div>
+}
+
 <div class="mb-3">
     <a href="/artistas/nuevo" class="btn btn-primary">
         + Nuevo Artista
     </a>
 </div>
+
 @if (artistas == null)
 {
-    <p><em>Cargando...</em></p>
+    @if (mensajeError == null) // Solo mostramos "Cargando" si no hay error
+    {
+        <p><em>Cargando...</em></p>
+    }
 }
 else
 {
@@ -33,18 +47,13 @@ else
                 <tr>
                     <td>@artista.Nombre</td>
                     <td>@artista.Discografica</td>
-                    <td>@artista.Nacionaldiad</td>
+                    <td>@artista.Nacionalidad</td> 
                     <td>@artista.NombreArtistico</td>
                     <td>
-                        @* Botón Editar (Navega a otra página) *@
-                        <button class="btn btn-warning btn-sm me-2" 
-                                @onclick="() => Editar(artista.Id)">
+                        <button class="btn btn-warning btn-sm me-2" @onclick="() => Editar(artista.Id)">
                             Editar
                         </button>
-
-                        @* Botón Eliminar (Ejecuta la acción directa) *@
-                        <button class="btn btn-danger btn-sm" 
-                                @onclick="() => Eliminar(artista)">
+                        <button class="btn btn-danger btn-sm" @onclick="() => Eliminar(artista)">
                             Eliminar
                         </button>
                     </td>
@@ -56,32 +65,47 @@ else
 
 @code {
     private Artista[]? artistas;
+    private string? mensajeError; // <--- 2. Variable para guardar el error
 
     protected override async Task OnInitializedAsync()
     {
-        try {
-            // Llamamos a tu API
+        try 
+        {
+            mensajeError = null; // Limpiamos errores previos
             artistas = await Http.GetFromJsonAsync<Artista[]>("/artistas");
         }
-        catch (Exception ex) { await JS.InvokeVoidAsync("alert", "Error al cargar los artistas: " + ex.Message); }
+        catch (Exception ex) 
+        { 
+            // 3. EN LUGAR DE JS.ALERT, guardamos el mensaje en la variable
+            mensajeError = $"No se pudieron cargar los artistas. ({ex.Message})";
+            
+            // Opcional: Imprimir en consola del servidor para debug
+            Console.WriteLine(ex); 
+        }
     }
 
-    // Navegar a la página de edición
     private void Editar(int id)
     {
         Navigation.NavigateTo($"/artistas/editar/{id}");
     }
     
-    // Lógica para borrar
     private async Task Eliminar(Artista artista)
     {
-        // Confirmación simple con Javascript
+        // Esto SI funciona porque ocurre al hacer click (ya no es prerender)
         bool confirmado = await JS.InvokeAsync<bool>("confirm", $"¿Seguro que querés borrar a {artista.Nombre}?");
         
         if (confirmado)
         {
-            await Http.DeleteAsync($"/artistas/{artista.Id}");
-            await OnInitializedAsync(); // Recargamos la lista para ver el cambio
+            try
+            {
+                await Http.DeleteAsync($"/artistas/{artista.Id}");
+                await OnInitializedAsync(); 
+            }
+            catch(Exception ex)
+            {
+                // Si falla el borrado, también lo mostramos en el cartel rojo
+                mensajeError = $"Error al eliminar: {ex.Message}";
+            }
         }
     }
 }

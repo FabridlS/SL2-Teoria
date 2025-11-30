@@ -219,7 +219,7 @@ app.MapPost("/artistas", (ArtistaCreacionDto dto, AppDbContext db) =>
         return Results.BadRequest("El nombre artístico del artista es obligatorio."); // 400
     }
 
-    if (string.IsNullOrEmpty(dto.Nacionaldiad))
+    if (string.IsNullOrEmpty(dto.Nacionalidad))
     {
         return Results.BadRequest("La nacionalidad del artista es obligatoria."); // 400
     }
@@ -234,7 +234,7 @@ app.MapPost("/artistas", (ArtistaCreacionDto dto, AppDbContext db) =>
         0, // El ID va en 0 porque la BD lo autogenera
         dto.Nombre,
         dto.NombreArtistico,
-        dto.Nacionaldiad,
+        dto.Nacionalidad,
         dto.Discografica
     );
     db.Artistas.Add(nuevoArtista);
@@ -253,7 +253,7 @@ app.MapPut("/artistas/{id}", (int id, Artista updatedArtista, AppDbContext db) =
 
     artista.Nombre = updatedArtista.Nombre;
     artista.NombreArtistico = updatedArtista.NombreArtistico;
-    artista.Nacionaldiad = updatedArtista.Nacionaldiad;
+    artista.Nacionalidad = updatedArtista.Nacionalidad;
     artista.Discografica = updatedArtista.Discografica;
 
     db.SaveChanges();

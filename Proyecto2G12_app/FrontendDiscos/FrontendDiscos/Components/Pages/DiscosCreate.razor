@@ -1,0 +1,67 @@
+@page "/discos/nuevo"
+@using proyecto2G12_app.Models
+@rendermode InteractiveServer // Le indica a razor que este componente es interactivo
+@* Que sea interactivo significa que el componente puede manejar eventos y actualizarse dinámicamente sin recargar la página *@
+@* Por defecto razor components son estáticos *@
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+
+<h3>Crear Nuevo Disco</h3>
+
+<div class="row">
+    <div class="col-md-6">
+        @* EditForm gestiona la validación y el envío *@
+        <EditForm Model="@nuevoDisco" OnValidSubmit="GuardarDisco">
+            
+            @* Campo: Titulo *@
+            <div class="mb-3">
+                <label class="form-label">Titulo</label>
+                <InputText class="form-control" @bind-Value="nuevoDisco.Titulo" />
+            </div>
+
+            @* Campo: Anio de lanazamiento *@
+            <div class="mb-3">
+                <label class="form-label">Anio de lanzamiento</label>
+                <InputNumber class="form-control" @bind-Value="nuevoDisco.AnioLanzamiento" />
+            </div>
+
+            @* Campo: Genero *@
+            <div class="mb-3">
+                <label class="form-label">Tipo de disco</label>
+                <InputText class="form-control" @bind-Value="nuevoDisco.TipoDisco" />
+            </div>
+
+            <button type="submit" class="btn btn-success">Guardar</button>
+            <a href="/discos" class="btn btn-secondary">Cancelar</a>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    // Creamos una instancia vacía para llenar con el formulario
+    private Disco nuevoDisco = new Disco();
+
+    private async Task GuardarDisco()
+    {
+        try
+        {
+            // 1. Enviamos el POST a la API
+            var respuesta = await Http.PostAsJsonAsync("/discos", nuevoDisco);
+
+            if (respuesta.IsSuccessStatusCode)
+            {
+                // 2. Si salió bien, volvemos a la lista
+                Navigation.NavigateTo("/discos");
+            }
+            else
+            {
+                await JS.InvokeVoidAsync("alert", "Error al guardar el disco.");
+            }
+        }
+        catch (Exception ex)
+        {
+            await JS.InvokeVoidAsync("alert", $"Error: {ex.Message}");
+        }
+    }
+}

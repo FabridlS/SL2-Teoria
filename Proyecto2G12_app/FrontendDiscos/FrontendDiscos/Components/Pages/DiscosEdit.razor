@@ -1,0 +1,68 @@
+@page "/discos/editar/{Id:int}"
+@using proyecto2G12_app.Models
+@rendermode InteractiveServer
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+
+
+<h3>Editar Disco</h3>
+
+@if (disco == null)
+{
+    <p><em>Cargando datos del disco...</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-6">
+            @* EditForm gestiona la validación y el envío *@
+            <EditForm Model="@disco" OnValidSubmit="ActualizarDisco">
+            
+            @* Campo: Titulo *@
+            <div class="mb-3">
+                <label class="form-label">Titulo</label>
+                <InputText class="form-control" @bind-Value="disco.Titulo" />
+            </div>
+
+            @* Campo: Anio de lanazamiento *@
+            <div class="mb-3">
+                <label class="form-label">Anio de lanzamiento</label>
+                <InputNumber class="form-control" @bind-Value="disco.AnioLanzamiento" />
+            </div>
+
+            @* Campo: Genero *@
+            <div class="mb-3">
+                <label class="form-label">Tipo de disco</label>
+                <InputText class="form-control" @bind-Value="disco.TipoDisco" />
+            </div>
+
+            <button type="submit" class="btn btn-warning">Actualizar</button>
+            <a href="/discos" class="btn btn-secondary">Cancelar</a>
+        </EditForm>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; } // Recibimos el ID desde la URL
+
+    private Disco? disco;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try {
+            disco = await Http.GetFromJsonAsync<Disco>($"/discos/{Id}");
+        } catch { 
+            await JS.InvokeVoidAsync("alert", "Error al cargar los datos del disco.");
+        }
+    }
+
+    private async Task ActualizarDisco()
+    {
+        // Enviamos el PUT con los datos modificados
+        await Http.PutAsJsonAsync($"/discos/{Id}", disco);
+        Navigation.NavigateTo("/discos");
+    }
+}

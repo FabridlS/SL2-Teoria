@@ -1,4 +1,4 @@
-namespace FrontendDiscos.Models;
+namespace proyecto2G12_app.Models;
 
 public class Disco
 {

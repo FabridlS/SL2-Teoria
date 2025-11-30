@@ -1,0 +1,73 @@
+@page "/cancniones/nuevo"
+@using proyecto2G12_app.Models
+@rendermode InteractiveServer // Le indica a razor que este componente es interactivo
+@* Que sea interactivo significa que el componente puede manejar eventos y actualizarse dinámicamente sin recargar la página *@
+@* Por defecto razor components son estáticos *@
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+
+<h3>Crear Nueva Cancion</h3>
+
+<div class="row">
+    <div class="col-md-6">
+        @* EditForm gestiona la validación y el envío *@
+        <EditForm Model="@nuevaCancion" OnValidSubmit="GuardarCancion">
+            
+            @* Campo: Titulo *@
+            <div class="mb-3">
+                <label class="form-label">Titulo</label>
+                <InputText class="form-control" @bind-Value="nuevaCancion.Titulo" />
+            </div>
+
+            @* Campo: Duracion *@
+            <div class="mb-3">
+                <label class="form-label">Duracion</label>
+                <InputText class="form-control" @bind-Value="nuevaCancion.Duracion" />
+            </div>
+
+            @* Campo: Genero *@
+            <div class="mb-3">
+                <label class="form-label">Genero</label>
+                <InputText class="form-control" @bind-Value="nuevaCancion.Genero" />
+            </div>
+
+            @* Campo: Disco perteneciente *@
+            <div class="mb-3">
+                <label class="form-label">Disco perteneciente</label>
+                <InputNumber class="form-control" @bind-Value="nuevaCancion.DiscoId" />
+            </div>
+
+            <button type="submit" class="btn btn-success">Guardar</button>
+            <a href="/canciones" class="btn btn-secondary">Cancelar</a>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    // Creamos una instancia vacía para llenar con el formulario
+    private Cancion nuevaCancion = new Cancion();
+
+    private async Task GuardarCancion()
+    {
+        try
+        {
+            // 1. Enviamos el POST a la API
+            var respuesta = await Http.PostAsJsonAsync("/canciones", nuevaCancion);
+
+            if (respuesta.IsSuccessStatusCode)
+            {
+                // 2. Si salió bien, volvemos a la lista
+                Navigation.NavigateTo("/canciones");
+            }
+            else
+            {
+                await JS.InvokeVoidAsync("alert", "Error al guardar la canción.");
+            }
+        }
+        catch (Exception ex)
+        {
+            await JS.InvokeVoidAsync("alert", $"Error: {ex.Message}");
+        }
+    }
+}

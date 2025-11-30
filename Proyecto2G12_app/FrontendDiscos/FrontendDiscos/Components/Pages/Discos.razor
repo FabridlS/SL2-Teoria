@@ -1,5 +1,5 @@
 @page "/discos"
-@using FrontendDiscos.Models
+@using proyecto2G12_app.Models
 @inject HttpClient Http
 @rendermode InteractiveServer
 @inject IJSRuntime JS
@@ -7,9 +7,27 @@
 
 <h3>Mis Discos desde la API</h3>
 
+@* 1. Bloque para mostrar errores si algo falla *@
+@if (!string.IsNullOrEmpty(mensajeError))
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <strong>Error:</strong> @mensajeError
+        <button type="button" class="btn-close" @onclick="() => mensajeError = null"></button>
+    </div>
+}
+
+<div class="mb-3">
+    <a href="/discos/nuevo" class="btn btn-primary">
+        + Nuevo Disco
+    </a>
+</div>
+
 @if (discos == null)
 {
-    <p><em>Cargando datos...</em></p>
+    @if (mensajeError == null) // Solo mostramos "Cargando" si no hay error
+    {
+        <p><em>Cargando...</em></p>
+    }
 }
 else
 {
@@ -19,6 +37,7 @@ else
                 <th>Título</th>
                 <th>Año</th>
                 <th>Tipo</th>
+                <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
@@ -28,6 +47,19 @@ else
                     <td>@disco.Titulo</td>
                     <td>@disco.AnioLanzamiento</td>
                     <td>@disco.TipoDisco</td>
+                    <td>
+                        @* Botón Editar (Navega a otra página) *@
+                        <button class="btn btn-warning btn-sm me-2" 
+                                @onclick="() => Editar(disco.Id)">
+                            Editar
+                        </button>
+
+                        @* Botón Eliminar (Ejecuta la acción directa) *@
+                        <button class="btn btn-danger btn-sm" 
+                                @onclick="() => Eliminar(disco)">
+                            Eliminar
+                        </button>
+                    </td>
                 </tr>
             }
         </tbody>
@@ -36,17 +68,46 @@ else
 
 @code {
     private Disco[]? discos;
+    private string? mensajeError;
 
     protected override async Task OnInitializedAsync()
     {
         // Acá llamamos al endpoint GET /discos de tu API
         try 
         {
+            mensajeError = null;
             discos = await Http.GetFromJsonAsync<Disco[]>("/discos");
         }
         catch (Exception ex)
         {
-           await JS.InvokeVoidAsync("alert", "Error al cargar los discos: " + ex.Message);
+           mensajeError = $"No se pudieron cargar los discos. ({ex.Message})";
+        }
+    }
+
+    // Navegar a la página de edición
+    private void Editar(int id)
+    {
+        Navigation.NavigateTo($"/discos/editar/{id}");
+    }
+    
+    // Lógica para borrar
+    private async Task Eliminar(Disco disco)
+    {
+        // Confirmación simple con Javascript
+        bool confirmado = await JS.InvokeAsync<bool>("confirm", $"¿Seguro que querés borrar a {disco.Titulo}?");
+        
+        if (confirmado)
+        {
+            try
+            {
+                await Http.DeleteAsync($"/discos/{disco.Id}");
+                await OnInitializedAsync(); 
+            }
+            catch(Exception ex)
+            {
+                // Si falla el borrado, también lo mostramos en el cartel rojo
+                mensajeError = $"Error al eliminar: {ex.Message}";
+            }
         }
     }
 }
