@@ -1,0 +1,68 @@
+@page "/"
+
+<PageTitle>Inicio - Mi Música</PageTitle>
+
+<div class="text-center mt-5">
+    <h1> Scuchify 1.0!</h1>
+    <p class="lead">Sistema de gestión de Artistas, Discos y Canciones.</p>
+</div>
+
+<hr class="my-4" />
+
+<div class="row">
+    @* --- TARJETA DE PERFIL (Tus Datos) --- *@
+    <div class="col-md-4">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">👤 Perfil del Desarrollador</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Nombre:</strong> Fabrizzio</p>
+                <p><strong>Rol:</strong> Programador (?)</p>
+                <p><strong>Tecnologías:</strong> .NET 8, SQLite, EF Core</p>
+                <p><strong>Estado:</strong> 🚀 Aprendiendo a full</p>
+            </div>
+        </div>
+    </div>
+
+    @* --- ATAJOS RÁPIDOS (Navegación) --- *@
+    <div class="col-md-8">
+        <div class="row">
+            @* Tarjeta Artistas *@
+            <div class="col-md-6 mb-3">
+                <div class="card h-100 border-primary">
+                    <div class="card-body text-center">
+                        <h3 class="display-6">🎤</h3>
+                        <h5 class="card-title">Artistas</h5>
+                        <p class="card-text">Gestioná tus bandas y cantantes favoritos.</p>
+                        <a href="artistas" class="btn btn-outline-primary">Ir a Artistas</a>
+                    </div>
+                </div>
+            </div>
+
+            @* Tarjeta Discos *@
+            <div class="col-md-6 mb-3">
+                <div class="card h-100 border-success">
+                    <div class="card-body text-center">
+                        <h3 class="display-6">💿</h3>
+                        <h5 class="card-title">Discos</h5>
+                        <p class="card-text">Explorá la colección de álbumes.</p>
+                        <a href="discos" class="btn btn-outline-success">Ir a Discos</a>
+                    </div>
+                </div>
+            </div>
+
+            @* Tarjeta Canciones *@
+            <div class="col-md-12">
+                <div class="card h-100 border-danger">
+                    <div class="card-body text-center">
+                        <h3 class="display-6">🎶</h3>
+                        <h5 class="card-title">Canciones</h5>
+                        <p class="card-text">El listado completo de temas.</p>
+                        <a href="canciones" class="btn btn-outline-danger">Ir a Canciones</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

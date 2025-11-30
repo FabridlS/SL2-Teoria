@@ -169,7 +169,7 @@ app.MapPut("/discos/{id}", (int id, Disco updatedDisco, AppDbContext db) =>
     disco.Titulo = updatedDisco.Titulo;
     disco.AnioLanzamiento = updatedDisco.AnioLanzamiento;
     disco.TipoDisco = updatedDisco.TipoDisco;
-    disco.ArtistaId = updatedDisco.ArtistaId;
+    //disco.ArtistaId = updatedDisco.ArtistaId;
 
     db.SaveChanges();
     return Results.NoContent();

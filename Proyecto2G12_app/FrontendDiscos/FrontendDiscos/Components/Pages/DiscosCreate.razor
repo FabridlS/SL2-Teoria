@@ -33,6 +33,11 @@
                 <InputText class="form-control" @bind-Value="nuevoDisco.TipoDisco" />
             </div>
 
+            <div class = "mb-3">
+                <label class="form-label">Artista ID (Vinculación)</label>
+                <InputNumber class="form-control" @bind-Value="nuevoDisco.ArtistaId" />
+            </div>
+            
             <button type="submit" class="btn btn-success">Guardar</button>
             <a href="/discos" class="btn btn-secondary">Cancelar</a>
         </EditForm>
