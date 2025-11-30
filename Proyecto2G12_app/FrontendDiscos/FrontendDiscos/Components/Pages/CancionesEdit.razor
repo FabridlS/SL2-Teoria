@@ -8,6 +8,13 @@
 
 <h3>Editar Cancion</h3>
 
+@if (!string.IsNullOrEmpty(mensajeError))
+{
+    <div class="alert alert-danger">
+        @mensajeError
+    </div>
+}
+
 @if (cancion == null)
 {
     <p><em>Cargando datos de la cancion...</em></p>
@@ -55,20 +62,35 @@ else
     public int Id { get; set; } // Recibimos el ID desde la URL
 
     private Cancion? cancion;
+    private string? mensajeError; 
 
     protected override async Task OnInitializedAsync()
     {
-        try {
+        try 
+        {
             cancion = await Http.GetFromJsonAsync<Cancion>($"/canciones/{Id}");
-        } catch { 
-            await JS.InvokeVoidAsync("alert", "Error al cargar los datos de la canción.");
+        } 
+        catch 
+        { 
+            mensajeError = "No se pudo cargar la canción.";
         }
     }
 
     private async Task ActualizarCancion()
     {
-        // Enviamos el PUT con los datos modificados
-        await Http.PutAsJsonAsync($"/canciones/{Id}", cancion);
-        Navigation.NavigateTo("/canciones");
+        // 1. Guardamos la respuesta en una variable en vez de ignorarla
+        var respuesta = await Http.PutAsJsonAsync($"/canciones/{Id}", cancion);
+
+        // 2. Preguntamos: ¿Salió todo bien (200-299)?
+        if (respuesta.IsSuccessStatusCode)
+        {
+            Navigation.NavigateTo("/canciones");
+        }
+        else
+        {
+            // 3. Si falló, leemos el mensaje que mandó la API y lo mostramos
+            var errorDetalle = await respuesta.Content.ReadAsStringAsync();
+            mensajeError = $"Error al guardar: {respuesta.StatusCode} - {errorDetalle}";
+        }
     }
 }

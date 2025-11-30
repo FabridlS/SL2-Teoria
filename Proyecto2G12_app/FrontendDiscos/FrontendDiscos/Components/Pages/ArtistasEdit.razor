@@ -8,6 +8,13 @@
 
 <h3>Editar Artista</h3>
 
+@if (!string.IsNullOrEmpty(mensajeError))
+{
+    <div class="alert alert-danger">
+        @mensajeError
+    </div>
+}
+
 @if (artista == null)
 {
     <p><em>Cargando datos del artista...</em></p>
@@ -50,20 +57,35 @@ else
     public int Id { get; set; } // Recibimos el ID desde la URL
 
     private Artista? artista;
+    private string? mensajeError; 
 
     protected override async Task OnInitializedAsync()
     {
-        try {
+        try 
+        {
             artista = await Http.GetFromJsonAsync<Artista>($"/artistas/{Id}");
-        } catch { 
-            await JS.InvokeVoidAsync("alert", "Error al cargar los datos del artista.");
+        } 
+        catch 
+        { 
+            mensajeError = "No se pudo cargar el artista.";
         }
     }
 
     private async Task ActualizarArtista()
     {
-        // Enviamos el PUT con los datos modificados
-        await Http.PutAsJsonAsync($"/artistas/{Id}", artista);
-        Navigation.NavigateTo("/artistas");
+        // 1. Guardamos la respuesta en una variable en vez de ignorarla
+        var respuesta = await Http.PutAsJsonAsync($"/artistas/{Id}", artista);
+
+        // 2. Preguntamos: ¿Salió todo bien (200-299)?
+        if (respuesta.IsSuccessStatusCode)
+        {
+            Navigation.NavigateTo("/artistas");
+        }
+        else
+        {
+            // 3. Si falló, leemos el mensaje que mandó la API y lo mostramos
+            var errorDetalle = await respuesta.Content.ReadAsStringAsync();
+            mensajeError = $"Error al guardar: {respuesta.StatusCode} - {errorDetalle}";
+        }
     }
 }

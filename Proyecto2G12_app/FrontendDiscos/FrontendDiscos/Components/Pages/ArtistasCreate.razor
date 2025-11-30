@@ -1,38 +1,40 @@
 @page "/artistas/nuevo"
 @using proyecto2G12_app.Models
-@rendermode InteractiveServer // Le indica a razor que este componente es interactivo
-@* Que sea interactivo significa que el componente puede manejar eventos y actualizarse dinámicamente sin recargar la página *@
-@* Por defecto razor components son estáticos *@
+@rendermode InteractiveServer
 @inject HttpClient Http
 @inject NavigationManager Navigation
-@inject IJSRuntime JS
 
 <h3>Crear Nuevo Artista</h3>
 
+@* --- Cartel de Error --- *@
+@if (!string.IsNullOrEmpty(mensajeError))
+{
+    <div class="alert alert-danger">
+        @mensajeError
+    </div>
+}
+
 <div class="row">
     <div class="col-md-6">
-        @* EditForm gestiona la validación y el envío *@
         <EditForm Model="@nuevoArtista" OnValidSubmit="GuardarArtista">
             
-            @* Campo: Nombre *@
             <div class="mb-3">
-                <label class="form-label">Nombre Real</label>
+                <label class="form-label">Nombre</label>
                 <InputText class="form-control" @bind-Value="nuevoArtista.Nombre" />
             </div>
 
-            @* Campo: Nombre Artístico*@
             <div class="mb-3">
                 <label class="form-label">Nombre Artístico</label>
-                <InputText class="form-control" @bind-Value="nuevoArtista.NombreArtistico" />
+                @* ¡IMPORTANTE! Usar InputNumber porque es int *@
+                <InputNumber class="form-control" @bind-Value="nuevoArtista.NombreArtistico" />
             </div>
 
-            @* Campo: Nacionalidad *@
             <div class="mb-3">
                 <label class="form-label">Nacionalidad</label>
+                @* Corregí el nombre de la propiedad si en tu modelo pusiste 'Nacionaldiad' con el typo *@
                 <InputText class="form-control" @bind-Value="nuevoArtista.Nacionalidad" />
             </div>
 
-            @* Campo: Discográfica *@
             <div class="mb-3">
                 <label class="form-label">Discográfica</label>
                 <InputText class="form-control" @bind-Value="nuevoArtista.Discografica" />
@@ -45,22 +47,28 @@
 </div>
 
 @code {
-    // Creamos una instancia vacía para llenar con el formulario
     private Artista nuevoArtista = new Artista();
+    private string? mensajeError;
 
     private async Task GuardarArtista()
     {
-        // 1. Enviamos el POST a la API
-        var respuesta = await Http.PostAsJsonAsync("/artistas", nuevoArtista);
+        try 
+        {
+            var respuesta = await Http.PostAsJsonAsync("/artistas", nuevoArtista);
 
-        if (respuesta.IsSuccessStatusCode)
-        {
-            // 2. Si salió bien, volvemos a la lista
-            Navigation.NavigateTo("/artistas");
+            if (respuesta.IsSuccessStatusCode)
+            {
+                Navigation.NavigateTo("/artistas");
+            }
+            else
+            {
+                var contenidoError = await respuesta.Content.ReadAsStringAsync();
+                mensajeError = $"Error al guardar: {respuesta.StatusCode} - {contenidoError}";
+            }
         }
-        else
+        catch (Exception ex)
         {
-            await JS.InvokeVoidAsync("alert", "Error al guardar el artista.");
+            mensajeError = $"Error crítico: {ex.Message}";
         }
     }
 }

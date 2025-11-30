@@ -1,40 +1,40 @@
-@page "/cancniones/nuevo"
+@page "/canciones/nuevo" 
 @using proyecto2G12_app.Models
-@rendermode InteractiveServer // Le indica a razor que este componente es interactivo
-@* Que sea interactivo significa que el componente puede manejar eventos y actualizarse dinámicamente sin recargar la página *@
-@* Por defecto razor components son estáticos *@
+@rendermode InteractiveServer
 @inject HttpClient Http
 @inject NavigationManager Navigation
-@inject IJSRuntime JS
 
 <h3>Crear Nueva Cancion</h3>
 
+@* --- Cartel de Error --- *@
+@if (!string.IsNullOrEmpty(mensajeError))
+{
+    <div class="alert alert-danger">
+        @mensajeError
+    </div>
+}
+
 <div class="row">
     <div class="col-md-6">
-        @* EditForm gestiona la validación y el envío *@
         <EditForm Model="@nuevaCancion" OnValidSubmit="GuardarCancion">
             
-            @* Campo: Titulo *@
             <div class="mb-3">
                 <label class="form-label">Titulo</label>
                 <InputText class="form-control" @bind-Value="nuevaCancion.Titulo" />
             </div>
 
-            @* Campo: Duracion *@
             <div class="mb-3">
                 <label class="form-label">Duracion</label>
                 <InputText class="form-control" @bind-Value="nuevaCancion.Duracion" />
             </div>
 
-            @* Campo: Genero *@
             <div class="mb-3">
                 <label class="form-label">Genero</label>
                 <InputText class="form-control" @bind-Value="nuevaCancion.Genero" />
             </div>
 
-            @* Campo: Disco perteneciente *@
             <div class="mb-3">
-                <label class="form-label">Disco perteneciente</label>
+                <label class="form-label">Disco ID (Vinculación)</label>
                 <InputNumber class="form-control" @bind-Value="nuevaCancion.DiscoId" />
             </div>
 
@@ -45,29 +45,28 @@
 </div>
 
 @code {
-    // Creamos una instancia vacía para llenar con el formulario
     private Cancion nuevaCancion = new Cancion();
+    private string? mensajeError;
 
     private async Task GuardarCancion()
     {
         try
         {
-            // 1. Enviamos el POST a la API
             var respuesta = await Http.PostAsJsonAsync("/canciones", nuevaCancion);
 
             if (respuesta.IsSuccessStatusCode)
             {
-                // 2. Si salió bien, volvemos a la lista
                 Navigation.NavigateTo("/canciones");
             }
             else
             {
-                await JS.InvokeVoidAsync("alert", "Error al guardar la canción.");
+                var contenidoError = await respuesta.Content.ReadAsStringAsync();
+                mensajeError = $"Error al guardar: {respuesta.StatusCode} - {contenidoError}";
             }
         }
         catch (Exception ex)
         {
-            await JS.InvokeVoidAsync("alert", $"Error: {ex.Message}");
+            mensajeError = $"Error: {ex.Message}";
         }
     }
 }
