@@ -1,6 +1,8 @@
 @page "/canciones"
 @using proyecto2G12_app.Models
 @inject HttpClient Http
+@rendermode InteractiveServer
+@inject IJSRuntime JS
 
 <h3>Mis Canciones</h3>
 
@@ -39,6 +41,6 @@ else
         try {
             canciones = await Http.GetFromJsonAsync<Cancion[]>("/canciones");
         }
-        catch (Exception ex) { Console.WriteLine(ex); }
+        catch (Exception ex) { await JS.InvokeVoidAsync("alert", "Error al cargar las canciones: " + ex.Message);}
     }
 }

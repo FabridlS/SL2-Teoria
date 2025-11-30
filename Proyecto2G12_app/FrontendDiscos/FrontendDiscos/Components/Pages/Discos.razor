@@ -1,6 +1,9 @@
 @page "/discos"
 @using FrontendDiscos.Models
 @inject HttpClient Http
+@rendermode InteractiveServer
+@inject IJSRuntime JS
+@inject NavigationManager Navigation
 
 <h3>Mis Discos desde la API</h3>
 
@@ -43,7 +46,7 @@ else
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error conectando a la API: {ex.Message}");
+           await JS.InvokeVoidAsync("alert", "Error al cargar los discos: " + ex.Message);
         }
     }
 }

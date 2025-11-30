@@ -63,7 +63,7 @@ else
             // Llamamos a tu API
             artistas = await Http.GetFromJsonAsync<Artista[]>("/artistas");
         }
-        catch (Exception ex) { Console.WriteLine(ex); }
+        catch (Exception ex) { await JS.InvokeVoidAsync("alert", "Error al cargar los artistas: " + ex.Message); }
     }
 
     // Navegar a la página de edición
